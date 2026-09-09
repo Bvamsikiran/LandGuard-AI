@@ -1,0 +1,277 @@
+Design a modern, professional web dashboard for an AI-powered Landslide Risk Prediction and Early Warning System.
+
+The application is called:
+"LANDGUARD AI"
+Subtitle: "AI-Powered Landslide Risk Monitoring & Early Warning"
+
+Create a complete responsive desktop dashboard UI suitable for a college innovation/internal contest demo. Make it look like a real government disaster-management / geospatial intelligence platform, not a generic admin dashboard.
+
+STYLE:
+- Modern clean UI
+- Professional disaster-management / GIS aesthetic
+- Dark navy/charcoal sidebar with a light main workspace
+- Use green, yellow, orange and red ONLY for risk status:
+  Green = Low
+  Yellow = Moderate
+  Orange = High
+  Red = Very High
+- Rounded cards
+- Subtle shadows
+- Clear typography
+- Excellent spacing
+- Strong visual hierarchy
+- Use map/GIS visualizations prominently
+- Use icons for navigation and buttons
+- Make important actions visually obvious
+- Desktop-first responsive design
+- Avoid excessive decoration
+- Make it look polished enough for a live judging/demo presentation
+
+CREATE THESE MAIN SCREENS:
+
+1. DASHBOARD / HOME
+
+Top header:
+- LANDGUARD AI logo/name
+- "Landslide Risk Monitoring System"
+- Location selector
+- Last updated timestamp
+- Notification bell
+- User/profile icon
+
+Left sidebar navigation:
+- Dashboard
+- Risk Map
+- Alerts
+- Location Analysis
+- Historical Landslides
+- Field Reports
+- Model Insights
+- Model Status
+- Settings
+
+Main dashboard:
+- Large "Current Risk Overview" card
+- Overall risk percentage
+- Current risk badge
+- "View Risk Map" button
+- Large interactive-looking risk heatmap/map
+- Map legend:
+  Low / Moderate / High / Very High
+- Statistics cards:
+  High Risk Areas
+  Active Alerts
+  Locations Monitored
+  Reports Received
+- "Recent High-Risk Locations" table
+- "Recent Alerts" panel
+- Small "AI Model Status" card showing:
+  Model: Landslide-XGBoost
+  Status: Active
+  Last Updated
+  Accuracy
+
+2. RISK MAP SCREEN
+
+Make the map the main focus.
+
+Header:
+- Search Location input
+- Search button
+- "Refresh Risk Data" button
+
+Map controls:
+- Zoom in/out
+- Current location
+- Fullscreen
+- Layer control
+- "Show Risk Heatmap" toggle
+- Risk filter dropdown/buttons:
+  All
+  Low
+  Moderate
+  High
+  Very High
+
+Display:
+- Large realistic GIS terrain/map background
+- Semi-transparent colored risk heatmap
+- Risk markers at different locations
+- Several red/orange high-risk zones
+- Map legend
+
+When a user clicks a map location, visually show a right-side Location Risk Details panel.
+
+3. LOCATION RISK DETAILS SIDE PANEL
+
+Title:
+"Location Risk Analysis"
+
+Show:
+- Location name
+- Latitude / Longitude
+- Large circular risk probability indicator
+  Example: 87%
+- VERY HIGH RISK badge
+
+Buttons:
+- "Why this Risk?"
+- "View Historical Landslides"
+- "Subscribe to Alerts"
+- "Share Risk Report"
+
+Section:
+"Major Contributing Factors"
+
+Show horizontal progress bars:
+- 24h Rainfall — 31%
+- Soil Moisture — 24%
+- Slope Steepness — 18%
+- Historical Landslides — 9%
+- Elevation — 8%
+
+Add:
+"AI Explanation"
+Short readable explanation of why the model classified this location as high risk.
+
+Add a prominent:
+"Take Action" button.
+
+4. ALERTS SCREEN
+
+Title:
+"Active Risk Alerts"
+
+Summary cards:
+- Very High
+- High
+- Moderate
+- Total Active Alerts
+
+Alert cards/table containing:
+- Location
+- Risk Level
+- Probability
+- Time
+- Status
+
+Buttons:
+- "View Details"
+- "Acknowledge"
+- "Filter Alerts"
+
+Add district/severity filters.
+
+Make VERY HIGH alerts visually prominent.
+
+5. FIELD REPORT SCREEN
+
+Title:
+"Report a Landslide / Hazard"
+
+Large action cards:
+- Report Slope Movement
+- Report Crack
+- Report Blocked Road
+- Report Rockfall
+
+Form:
+- Upload Photo
+- Capture/Select Location
+- Description
+- Hazard Type
+- Severity
+
+Buttons:
+"Upload Photo + Location"
+"Submit Report"
+
+Show a recent reports section below.
+
+6. MODEL INSIGHTS SCREEN
+
+Title:
+"AI Model Insights"
+
+Show:
+- Model name
+- Prediction confidence
+- Model version
+- Last trained date
+- Accuracy
+- Precision
+- Recall
+- F1 Score
+
+Create an attractive feature-importance visualization.
+
+Show:
+Rainfall
+Soil Moisture
+Slope
+Historical Landslides
+Elevation
+Land Cover
+
+Add an "Explain Prediction" card explaining the current prediction in simple language.
+
+7. MODEL STATUS SCREEN
+
+Show professional system monitoring cards:
+- AI Model: Online
+- GIS Data: Updated
+- Risk Prediction API: Online
+- Heatmap Service: Online
+- Last Model Update
+- Dataset size
+- Model version
+
+Use green status indicators.
+
+IMPORTANT INTERACTIONS:
+
+- Clicking "Risk Map" opens the full Risk Map screen.
+- Clicking a map location opens the Location Risk Details side panel.
+- "Why this Risk?" opens the AI explanation section.
+- "View Historical Landslides" shows historical landslide locations near the selected point.
+- "Subscribe to Alerts" changes to "Subscribed ✓".
+- "Refresh Risk Data" shows a loading state and then updated data.
+- Risk filters dynamically change visible markers/heatmap.
+- Search Location shows the selected location and prediction.
+- "View Details" on alerts opens the location risk panel.
+- "Acknowledge" changes alert status to "Acknowledged".
+- Field Report submission shows a success confirmation.
+
+DESIGN THE DEMO FLOW TO BE VERY IMPRESSIVE:
+
+Dashboard
+→ Click "View Risk Map"
+→ Search/select location
+→ Click a high-risk point
+→ Location Risk Details opens
+→ Show 87% VERY HIGH RISK
+→ Click "Why this Risk?"
+→ Show contributing factors with percentages
+→ Open historical landslides
+→ Subscribe to alerts
+
+Use realistic sample data and labels for the prototype, but clearly structure the UI so real API data can replace the sample data later.
+
+Make buttons large enough to be easily clicked during a live demonstration.
+
+Create reusable components for:
+- Buttons
+- Risk badges
+- Cards
+- Map markers
+- Alert cards
+- Statistics cards
+- Sidebar navigation
+- Search bar
+- Filters
+- Progress bars
+- Modal/side panels
+
+Use consistent spacing, typography, icons and component states.
+
+Prioritize the Dashboard, Risk Map, Location Risk Details and Alerts screens because these are the most important screens for the demo.

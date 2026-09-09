@@ -1,0 +1,147 @@
+==========================================================================
+  MULTI-HAZARD EARLY WARNING SYSTEM -- MODEL EVALUATION REPORT
+  Generated : 2026-09-09 02:39:03
+  Pipeline  : AI/ML Prediction Pipeline v1.0 (Prototype)
+  Pilot Area: Sikkim, Himalayan Region, India
+==========================================================================
+
+*** PROTOTYPE WARNING ***
+--------------------------------------------------------------------------
+   This is a prototype system. Risk probabilities are estimates based on a
+   simulated training dataset. Model has not been validated against real
+   Himalayan landslide events. Do not use for operational emergency
+   decisions.
+
+==========================================================================
+  MODEL: logistic_regression
+  Evaluated at: 2026-09-09T02:39:02
+==========================================================================
+  Accuracy  : 1.0000
+  *** WARNING: accuracy > 95% -- may reflect class imbalance. Prioritise PR-AUC and Recall. ***
+
+  Confusion Matrix (rows=actual, cols=predicted):
+                  Pred: No-LS   Pred: LS
+  Actual: No-LS          926          0
+  Actual: LS               0         74
+
+  Core Metrics (class = landslide / positive):
+    Precision  : 1.0000
+    Recall     : 1.0000   <- landslide detection rate (most critical)
+    F1-score   : 1.0000
+    ROC-AUC    : 1.0000
+    PR-AUC     : 1.0000   <- PRIMARY METRIC
+
+  Feature Importance (top 10):
+     1. antecedent_rainfall_anomaly              0.249807
+     2. rainfall_7day_mm                         0.236637
+     3. soil_moisture_pct                        0.122790
+     4. rainfall_3hr_mm                          0.121738
+     5. distance_to_road_km                      0.080914
+     6. temperature_C                            0.072462
+     7. rainfall_intensity                       0.039963
+     8. rainfall_24hr_mm                         0.038049
+     9. distance_to_river_km                     0.024195
+    10. rainfall_3day_mm                         0.023021
+
+  Classification Report:
+    Class             Precision   Recall       F1   Support
+    -------------------------------------------------------
+    no_landslide         1.0000   1.0000   1.0000       926
+    landslide            1.0000   1.0000   1.0000        74
+    macro avg            1.0000   1.0000   1.0000      1000
+
+==========================================================================
+  MODEL: random_forest
+  Evaluated at: 2026-09-09T02:39:02
+==========================================================================
+  Accuracy  : 1.0000
+  *** WARNING: accuracy > 95% -- may reflect class imbalance. Prioritise PR-AUC and Recall. ***
+
+  Confusion Matrix (rows=actual, cols=predicted):
+                  Pred: No-LS   Pred: LS
+  Actual: No-LS          926          0
+  Actual: LS               0         74
+
+  Core Metrics (class = landslide / positive):
+    Precision  : 1.0000
+    Recall     : 1.0000   <- landslide detection rate (most critical)
+    F1-score   : 1.0000
+    ROC-AUC    : 1.0000
+    PR-AUC     : 1.0000   <- PRIMARY METRIC
+
+  Feature Importance (top 10):
+     1. soil_moisture_pct                        0.152300
+     2. rainfall_3hr_mm                          0.129003
+     3. ndvi                                     0.118397
+     4. rainfall_24hr_mm                         0.112991
+     5. rainfall_3day_mm                         0.105361
+     6. tilt_change_deg                          0.080484
+     7. historical_landslide_density             0.056808
+     8. rainfall_30min_mm                        0.055750
+     9. rainfall_intensity                       0.047278
+    10. antecedent_rainfall_anomaly              0.045679
+
+  Classification Report:
+    Class             Precision   Recall       F1   Support
+    -------------------------------------------------------
+    no_landslide         1.0000   1.0000   1.0000       926
+    landslide            1.0000   1.0000   1.0000        74
+    macro avg            1.0000   1.0000   1.0000      1000
+
+==========================================================================
+  MODEL: xgboost
+  Evaluated at: 2026-09-09T02:39:02
+==========================================================================
+  Accuracy  : 1.0000
+  *** WARNING: accuracy > 95% -- may reflect class imbalance. Prioritise PR-AUC and Recall. ***
+
+  Confusion Matrix (rows=actual, cols=predicted):
+                  Pred: No-LS   Pred: LS
+  Actual: No-LS          926          0
+  Actual: LS               0         74
+
+  Core Metrics (class = landslide / positive):
+    Precision  : 1.0000
+    Recall     : 1.0000   <- landslide detection rate (most critical)
+    F1-score   : 1.0000
+    ROC-AUC    : 1.0000
+    PR-AUC     : 1.0000   <- PRIMARY METRIC
+
+  Feature Importance (top 10):
+     1. soil_moisture_pct                        0.304045
+     2. rainfall_3day_mm                         0.240737
+     3. tilt_change_deg                          0.149854
+     4. rainfall_3hr_mm                          0.115666
+     5. rainfall_24hr_mm                         0.069483
+     6. rainfall_intensity                       0.034404
+     7. ndvi                                     0.033272
+     8. antecedent_rainfall_anomaly              0.031923
+     9. historical_landslide_density             0.008864
+    10. distance_to_river_km                     0.004592
+
+  Classification Report:
+    Class             Precision   Recall       F1   Support
+    -------------------------------------------------------
+    no_landslide         1.0000   1.0000   1.0000       926
+    landslide            1.0000   1.0000   1.0000        74
+    macro avg            1.0000   1.0000   1.0000      1000
+
+==========================================================================
+  SIDE-BY-SIDE MODEL COMPARISON
+==========================================================================
+  Model                  |  Precision |   Recall |       F1 |   ROC-AUC |    PR-AUC
+  ------------------------------------------------------------------------
+  logistic_regression    |     1.0000 |   1.0000 |   1.0000 |    1.0000 |    1.0000
+  random_forest          |     1.0000 |   1.0000 |   1.0000 |    1.0000 |    1.0000
+  xgboost                |     1.0000 |   1.0000 |   1.0000 |    1.0000 |    1.0000
+
+  [RECOMMENDED] 'logistic_regression' (PR-AUC = 1.0000) selected as best model.
+
+==========================================================================
+*** REMINDER -- PROTOTYPE WARNING ***
+--------------------------------------------------------------------------
+   This is a prototype system. Risk probabilities are estimates based on a
+   simulated training dataset. Model has not been validated against real
+   Himalayan landslide events. Do not use for operational emergency
+   decisions.
+==========================================================================

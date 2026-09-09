@@ -1,0 +1,76 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import 'tailwindcss';
+@import 'leaflet/dist/leaflet.css';
+
+@theme {
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Custom colors for risk */
+  --color-risk-low: #10B981;
+  --color-risk-moderate: #F59E0B;
+  --color-risk-high: #F97316;
+  --color-risk-very-high: #EF4444;
+  --color-risk-very-high-bg: #FEF2F2;
+  --color-risk-high-bg: #FFF7ED;
+
+  /* Default theme variables */
+  --color-background: var(--bg-main);
+  --color-foreground: var(--fg-main);
+  --color-card: var(--card-bg);
+  --color-card-foreground: var(--fg-main);
+  --color-primary: #3B82F6;
+  --color-primary-foreground: #FFFFFF;
+  --color-sidebar: #0F172A;
+  --color-sidebar-foreground: #F8FAFC;
+  --color-sidebar-hover: #1E293B;
+  --color-border: var(--border-main);
+  --color-muted: var(--muted-fg);
+  --color-muted-bg: var(--muted-bg);
+}
+
+:root, .light {
+  --bg-main: #F8FAFC;
+  --fg-main: #0F172A;
+  --card-bg: #FFFFFF;
+  --border-main: #E2E8F0;
+  --muted-fg: #64748B;
+  --muted-bg: #F1F5F9;
+}
+
+.dark {
+  --bg-main: #090D16;
+  --fg-main: #F9FAFB;
+  --card-bg: #111827;
+  --border-main: #1F2937;
+  --muted-fg: #9CA3AF;
+  --muted-bg: #1F2937;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+.custom-leaflet-marker,
+.custom-historical-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.leaflet-container {
+  font-family: 'Inter', sans-serif !important;
+  background-color: #0f172a !important;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 1rem !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.2) !important;
+  padding: 0.25rem !important;
+}
+
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
