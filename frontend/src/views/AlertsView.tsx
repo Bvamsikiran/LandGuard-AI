@@ -1,8 +1,29 @@
 import React, { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { AlertTriangle, Filter, Eye, CheckCircle2, AlertCircle } from "lucide-react"
+import { AlertTriangle, Filter, Eye, CheckCircle2, AlertCircle, MessageSquare, X } from "lucide-react"
 import { Alert } from "../types"
 import RiskBadge from "../components/common/RiskBadge"
+
+const API_BASE =
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE_URL) ||
+  "/api/v1"
+
+async function dispatchSMSAlert(alert: Alert): Promise<{ demo_mode: boolean; message_preview: string; recipients_count: number; integration_note: string }> {
+  const res = await fetch(`${API_BASE}/risk/alerts/sms`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      alert_id: alert.id,
+      location: alert.location,
+      risk_level: alert.level,
+      probability: alert.prob,
+      state: alert.state,
+      provider: "twilio",
+    }),
+  })
+  if (!res.ok) throw new Error(`SMS API error ${res.status}`)
+  return res.json()
+}
 
 export default function AlertsView({
   alerts,
@@ -18,6 +39,8 @@ export default function AlertsView({
   const [showFilter, setShowFilter] = useState(false)
   const [filterSeverity, setFilterSeverity] = useState<string[]>(["Very High", "High", "Moderate"])
   const [filterStatus, setFilterStatus] = useState<string[]>(["Active", "Acknowledged"])
+  const [smsLoading, setSmsLoading] = useState<number | null>(null)
+  const [smsResult, setSmsResult] = useState<{ alert: Alert; data: Awaited<ReturnType<typeof dispatchSMSAlert>> } | null>(null)
 
   const regionAlerts =
     selectedRegion === "Northeastern India"
@@ -233,7 +256,7 @@ export default function AlertsView({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
+                <div className="flex items-center gap-2 shrink-0 self-end md:self-center flex-wrap">
                   <button
                     onClick={() => onViewDetails(alert.locationId)}
                     className="px-4 py-2.5 text-xs font-bold border border-border rounded-xl bg-card hover:bg-muted-bg flex items-center gap-1.5 transition-colors shadow-xs"
@@ -241,12 +264,44 @@ export default function AlertsView({
                     <Eye size={15} /> View Details
                   </button>
                   {alert.status === "Active" && (
-                    <button
-                      onClick={() => onAcknowledge(alert.id)}
-                      className="px-4 py-2.5 text-xs font-bold rounded-xl bg-primary text-white hover:bg-primary/90 flex items-center gap-1.5 shadow-md shadow-primary/20 transition-all"
-                    >
-                      <CheckCircle2 size={15} /> Acknowledge
-                    </button>
+                    <>
+                      <button
+                        onClick={async () => {
+                          setSmsLoading(alert.id)
+                          try {
+                            const data = await dispatchSMSAlert(alert)
+                            setSmsResult({ alert, data })
+                          } catch (err) {
+                            setSmsResult({
+                              alert,
+                              data: {
+                                demo_mode: true,
+                                message_preview: `⚠️ LANDGUARD ALERT: ${alert.level} landslide risk at ${alert.location}, ${alert.state}. AI Probability: ${alert.prob}. Take immediate precautionary action.`,
+                                recipients_count: 2,
+                                integration_note: "Backend unreachable — SMS preview generated locally.",
+                              },
+                            })
+                          } finally {
+                            setSmsLoading(null)
+                          }
+                        }}
+                        disabled={smsLoading === alert.id}
+                        className="px-4 py-2.5 text-xs font-bold rounded-xl bg-amber-500 text-white hover:bg-amber-600 flex items-center gap-1.5 shadow-md shadow-amber-500/20 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        {smsLoading === alert.id ? (
+                          <span className="size-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                        ) : (
+                          <MessageSquare size={15} />
+                        )}
+                        Send SMS
+                      </button>
+                      <button
+                        onClick={() => onAcknowledge(alert.id)}
+                        className="px-4 py-2.5 text-xs font-bold rounded-xl bg-primary text-white hover:bg-primary/90 flex items-center gap-1.5 shadow-md shadow-primary/20 transition-all"
+                      >
+                        <CheckCircle2 size={15} /> Acknowledge
+                      </button>
+                    </>
                   )}
                 </div>
               </motion.div>
@@ -254,6 +309,79 @@ export default function AlertsView({
           </AnimatePresence>
         </div>
       )}
+
+      {/* SMS Confirmation Modal */}
+      <AnimatePresence>
+        {smsResult && (
+          <motion.div
+            key="sms-modal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            onClick={() => setSmsResult(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.92, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.92, opacity: 0, y: 20 }}
+              transition={{ type: "spring", stiffness: 300, damping: 24 }}
+              className="bg-card border border-amber-500/30 rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="size-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
+                    <MessageSquare size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-base text-foreground">
+                      {smsResult.data.demo_mode ? "SMS Alert (Demo)" : "SMS Alert Dispatched ✓"}
+                    </h3>
+                    <p className="text-[11px] text-muted">
+                      {smsResult.data.recipients_count} recipient{smsResult.data.recipients_count !== 1 ? "s" : ""} · {smsResult.alert.state} DM Control Room
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSmsResult(null)}
+                  className="text-muted hover:text-foreground transition-colors p-1"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Message Preview */}
+              <div className="bg-muted-bg rounded-xl p-4 border border-border">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-muted mb-2">Message Preview</div>
+                <p className="text-xs text-foreground leading-relaxed font-mono">
+                  {smsResult.data.message_preview}
+                </p>
+              </div>
+
+              {/* Status Tag */}
+              <div className={`flex items-center gap-2 text-xs font-medium px-3 py-2 rounded-xl ${
+                smsResult.data.demo_mode
+                  ? "bg-amber-500/10 text-amber-600 border border-amber-500/20"
+                  : "bg-risk-low/10 text-risk-low border border-risk-low/20"
+              }`}>
+                <span className={`size-2 rounded-full ${
+                  smsResult.data.demo_mode ? "bg-amber-500" : "bg-risk-low animate-pulse"
+                }`} />
+                {smsResult.data.integration_note}
+              </div>
+
+              <button
+                onClick={() => setSmsResult(null)}
+                className="w-full bg-primary text-white text-xs font-bold py-2.5 rounded-xl hover:bg-primary/90 transition-colors"
+              >
+                Close
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
