@@ -4,7 +4,9 @@ import { AlertTriangle, Filter, Eye, CheckCircle2, AlertCircle, MessageSquare, X
 import { Alert } from "../types"
 import RiskBadge from "../components/common/RiskBadge"
 
-const API_BASE = "/api/v1"
+const API_BASE =
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE_URL) ||
+  "/api/v1"
 
 async function dispatchSMSAlert(alert: Alert): Promise<{ demo_mode: boolean; message_preview: string; recipients_count: number; integration_note: string }> {
   const res = await fetch(`${API_BASE}/risk/alerts/sms`, {
