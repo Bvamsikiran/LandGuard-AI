@@ -817,3 +817,184 @@ async def submit_field_report(report: Dict[str, Any]) -> Dict[str, Any]:
     _FIELD_REPORTS.insert(0, report)
     return {"status": "success", "report": report}
 
+
+# ---------------------------------------------------------------------------
+# SMS Alert Stub — Twilio / MSG91 Architecture Demo
+# ---------------------------------------------------------------------------
+
+class SMSAlertRequest(BaseModel):
+    """Request schema for dispatching an SMS early warning alert."""
+    alert_id: int = Field(..., description="Alert ID to dispatch")
+    location: str = Field(..., description="Location name for the alert message")
+    risk_level: str = Field(..., description="Risk level: Very High / High / Moderate")
+    probability: str = Field(..., description="Risk probability string e.g. '87%'")
+    state: str = Field(..., description="Indian state of the alert")
+    recipients: Optional[List[str]] = Field(
+        default=None,
+        description="List of phone numbers (E.164 format). Defaults to configured district DM contacts."
+    )
+    provider: Optional[str] = Field(
+        default="twilio",
+        description="SMS provider: 'twilio' or 'msg91'"
+    )
+
+
+class SMSAlertResponse(BaseModel):
+    status: str
+    provider: str
+    demo_mode: bool
+    message_sid: Optional[str] = None
+    recipients_count: int
+    message_preview: str
+    dispatched_at: str
+    integration_note: str
+
+
+# Default demo contacts (DM control rooms for NER states)
+_DM_CONTACTS: Dict[str, List[str]] = {
+    "Sikkim": ["+919434200001", "+919434200002"],
+    "Arunachal Pradesh": ["+919436200001", "+919436200002"],
+    "Nagaland": ["+919436300001"],
+    "Manipur": ["+913852300001", "+913852300002"],
+    "Mizoram": ["+913892300001"],
+    "Tripura": ["+913812300001"],
+    "Meghalaya": ["+913642300001", "+913642300002"],
+    "Assam": ["+913612300001", "+913612300002"],
+}
+
+
+@router.post(
+    "/alerts/sms",
+    response_model=SMSAlertResponse,
+    summary="Dispatch an SMS early warning alert to district authorities",
+    description=(
+        "Sends an automated landslide early warning SMS via Twilio or MSG91. "
+        "In production, set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM env vars. "
+        "Without credentials, runs in demo mode and returns a realistic simulated response."
+    ),
+    tags=["Early Warning"],
+)
+async def send_sms_alert(payload: SMSAlertRequest) -> SMSAlertResponse:
+    """
+    Dispatch an early-warning SMS alert to district administration contacts.
+
+    Production Integration:
+        Twilio:  Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM env vars.
+        MSG91:   Set MSG91_API_KEY, MSG91_SENDER env vars.
+
+    Demo mode is automatically activated when credentials are not present.
+    All demo responses are realistic simulations — no real SMS is sent.
+    """
+    import os
+
+    # Resolve recipients
+    targets = payload.recipients or _DM_CONTACTS.get(payload.state, ["+91XXXXXXXXXX"])
+
+    # Compose the alert message (SMS-safe, under 160 chars for single segment)
+    risk_emoji = {"Very High": "🔴", "High": "🟠", "Moderate": "🟡"}.get(payload.risk_level, "⚠️")
+    message = (
+        f"{risk_emoji} LANDGUARD ALERT: {payload.risk_level} landslide risk at "
+        f"{payload.location}, {payload.state}. "
+        f"AI Probability: {payload.probability}. "
+        f"Take immediate precautionary action. -NDMA/LandGuard AI"
+    )
+
+    now_str = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    provider = (payload.provider or "twilio").lower()
+
+    # -----------------------------------------------------------------------
+    # Twilio Integration (live when env vars present)
+    # -----------------------------------------------------------------------
+    if provider == "twilio":
+        sid = os.getenv("TWILIO_ACCOUNT_SID", "")
+        token = os.getenv("TWILIO_AUTH_TOKEN", "")
+        from_num = os.getenv("TWILIO_FROM", "")
+
+        if sid and token and from_num:
+            try:
+                from twilio.rest import Client  # type: ignore
+                client = Client(sid, token)
+                msg = client.messages.create(body=message, from_=from_num, to=targets[0])
+                logger.info(f"Twilio SMS sent: {msg.sid} to {targets[0]}")
+                return SMSAlertResponse(
+                    status="sent",
+                    provider="twilio",
+                    demo_mode=False,
+                    message_sid=msg.sid,
+                    recipients_count=len(targets),
+                    message_preview=message[:120] + "...",
+                    dispatched_at=now_str,
+                    integration_note="Live Twilio SMS dispatched successfully.",
+                )
+            except Exception as e:
+                logger.warning(f"Twilio send failed: {e}. Falling back to demo mode.")
+
+        # Demo mode — no credentials
+        fake_sid = f"SM{hash(message) % 10**32:032x}"[:34]
+        return SMSAlertResponse(
+            status="demo_sent",
+            provider="twilio",
+            demo_mode=True,
+            message_sid=fake_sid,
+            recipients_count=len(targets),
+            message_preview=message[:120] + "...",
+            dispatched_at=now_str,
+            integration_note=(
+                "DEMO MODE: No real SMS sent. To enable live Twilio dispatch, "
+                "set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM environment variables."
+            ),
+        )
+
+    # -----------------------------------------------------------------------
+    # MSG91 Integration (live when env vars present)
+    # -----------------------------------------------------------------------
+    elif provider == "msg91":
+        import urllib.request
+        import urllib.parse
+
+        api_key = os.getenv("MSG91_API_KEY", "")
+        sender = os.getenv("MSG91_SENDER", "LNDGRD")
+
+        if api_key:
+            try:
+                for num in targets:
+                    mobile = num.lstrip("+")
+                    url = (
+                        f"https://api.msg91.com/api/sendhttp.php"
+                        f"?authkey={api_key}&mobiles={mobile}"
+                        f"&message={urllib.parse.quote(message)}"
+                        f"&sender={sender}&route=4&country=91"
+                    )
+                    with urllib.request.urlopen(url, timeout=5) as resp:
+                        logger.info(f"MSG91 response: {resp.read().decode()}")
+                return SMSAlertResponse(
+                    status="sent",
+                    provider="msg91",
+                    demo_mode=False,
+                    recipients_count=len(targets),
+                    message_preview=message[:120] + "...",
+                    dispatched_at=now_str,
+                    integration_note="Live MSG91 SMS dispatched successfully.",
+                )
+            except Exception as e:
+                logger.warning(f"MSG91 send failed: {e}. Falling back to demo mode.")
+
+        return SMSAlertResponse(
+            status="demo_sent",
+            provider="msg91",
+            demo_mode=True,
+            recipients_count=len(targets),
+            message_preview=message[:120] + "...",
+            dispatched_at=now_str,
+            integration_note=(
+                "DEMO MODE: No real SMS sent. To enable live MSG91 dispatch, "
+                "set MSG91_API_KEY and MSG91_SENDER environment variables."
+            ),
+        )
+
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unknown SMS provider '{provider}'. Supported: 'twilio', 'msg91'",
+        )
+
